@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding Linear Equations</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        
+        section h2 {
+            color: #2575fc;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .explanation {
+            padding-right: 20px;
+        }
+        
+        .equation-examples {
+            margin-top: 20px;
+        }
+        
+        .equation-examples h3 {
+            color: #6a11cb;
+            margin-bottom: 10px;
+        }
+        
+        .equation-list {
+            list-style-type: none;
+        }
+        
+        .equation-list li {
+            padding: 8px 0;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        
+        .equation-list li:last-child {
+            border-bottom: none;
+        }
+        
+        canvas {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .controls button {
+            padding: 8px 15px;
+            background-color: #6a11cb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .controls button:hover {
+            background-color: #5a0db5;
+        }
+        
+        .controls button.active {
+            background-color: #2575fc;
+        }
+        
+        .equation-display {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f0f5ff;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 1.2rem;
+            text-align: center;
+        }
+        
+        .graph-container {
+            text-align: center;
+        }
+        
+        .graph-container h3 {
+            margin-bottom: 10px;
+            color: #6a11cb;
+        }
+        
+        .comparison-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .comparison-controls button {
+            padding: 8px 15px;
+            background-color: #6a11cb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .comparison-controls button:hover {
+            background-color: #5a0db5;
+        }
+        
+        .comparison-controls button.active {
+            background-color: #2575fc;
+        }
+        
+        .solution-checker {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .solution-checker input {
+            padding: 8px;
+            margin: 0 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 80px;
+        }
+        
+        .solution-checker button {
+            padding: 8px 15px;
+            background-color: #6a11cb;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .correct {
+            background-color: #e6f7e9;
+            color: #2e7d32;
+        }
+        
+        .incorrect {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        
+        .solution-display {
+            margin-top: 10px;
+            padding: 8px;
+            background-color: #f0f5ff;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Understanding Linear Equations</h1>
+            <p class="subtitle">A visual guide for Secondary 1 students</p>
+        </header>
+        
+        <!-- Part 1: What is a Linear Equation in One Unknown -->
+        <section id="part1">
+            <h2>Part 1: What is a Linear Equation in One Unknown?</h2>
+            <div class="content">
+                <div class="explanation">
+                    <p>A linear equation in one unknown is an equation with only one variable (like x) that we need to solve. When we solve it, we find the value of x that makes the equation true.</p>
+                    <p>These equations look like:</p>
+                    <p style="text-align: center; font-size: 1.2rem; margin: 15px 0;">x + a = b and ax + b = cx + d etc.</p>
+                    <p>as long as there exists one unknown and the index of the unknown is 1.</p>
+                    
+                    <div class="equation-examples">
+                        <h3>Examples of Linear Equations:</h3>
+                        <ul class="equation-list">
+                            <li>2x - 4 = 5 + x</li>
+                            <li>3x + 2 = 8 - x</li>
+                            <li>5x = 15</li>
+                            <li>x + 7 = 2x - 3</li>
+                            <li>4 - 2x = 3x + 9</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="graph-container">
+                    <h3>Solution on a Number Line</h3>
+                    <canvas id="numberLineCanvas"></canvas>
+                    <div class="controls">
+                        <button class="active" data-equation="2x - 4 = 5 + x">2x - 4 = 5 + x</button>
+                        <button data-equation="3x + 2 = 8 - x">3x + 2 = 8 - x</button>
+                        <button data-equation="5x = 15">5x = 15</button>
+                    </div>
+                    <div class="equation-display" id="currentEquation">2x - 4 = 5 + x</div>
+                    <div class="solution-display" id="solutionDisplay">Solution: x = 9</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Part 2: Linear vs Non-Linear Equations -->
+        <section id="part2">
+            <h2>Part 2: Linear vs Non-Linear Equations</h2>
+            <p style="text-align: center; margin-bottom: 20px;">Compare how linear equations have one solution while non-linear equations can have curves</p>
+            
+            <div class="content">
+                <div class="graph-container">
+                    <h3>Linear Equation</h3>
+                    <canvas id="linearComparisonCanvas"></canvas>
+                    <div class="equation-display" id="linearComparisonEquation">2x - 4 = 5 + x</div>
+                    <div class="solution-display" id="linearSolutionDisplay">One solution: x = 9</div>
+                </div>
+                
+                <div class="graph-container">
+                    <h3>Non-Linear Equation</h3>
+                    <canvas id="nonLinearComparisonCanvas"></canvas>
+                    <div class="equation-display" id="nonLinearComparisonEquation">x² = 16</div>
+                    <div class="solution-display" id="nonLinearSolutionDisplay">Two solutions: x = 4, x = -4</div>
+                </div>
+            </div>
+            
+            <div class="comparison-controls">
+                <button class="active" data-linear="2x - 4 = 5 + x" data-nonlinear="x² = 16">Example 1</button>
+                <button data-linear="3x + 2 = 8 - x" data-nonlinear="x² - 4 = 0">Example 2</button>
+                <button data-linear="5x = 15" data-nonlinear="x³ - 8 = 0">Example 3</button>
+            </div>
+        </section>
+        
+        <!-- Part 3: Checking Solutions -->
+        <section id="part3">
+            <h2>Part 3: Checking if a Point is a Solution</h2>
+            <p style="text-align: center; margin-bottom: 20px;">See if a number makes the equation true</p>
+            
+            <div class="content">
+                <div class="explanation">
+                    <p>To check if a number is a solution to an equation:</p>
+                    <ol>
+                        <li>Replace the variable with the number</li>
+                        <li>Calculate both sides of the equation</li>
+                        <li>If both sides are equal, the number is a solution!</li>
+                    </ol>
+                    
+                    <div class="equation-examples">
+                        <h3>Example:</h3>
+                        <p>For the equation 2x - 4 = 5 + x:</p>
+                        <ul class="equation-list">
+                            <li>If x = 9: 2(9) - 4 = 18 - 4 = 14 and 5 + 9 = 14 ✓</li>
+                            <li>If x = 5: 2(5) - 4 = 10 - 4 = 6 and 5 + 5 = 10 ✗</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="graph-container">
+                    <h3>Check Your Solution</h3>
+                    <canvas id="solutionCanvas"></canvas>
+                    <div class="equation-display" id="checkEquation">2x - 4 = 5 + x</div>
+                    <div class="solution-checker">
+                        <p>Enter a value for x:</p>
+                        <input type="number" id="xValue" value="5" step="1">
+                        <button id="checkSolution">Check Solution</button>
+                        <div class="result" id="checkResult"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <p>Created for Secondary 1 Mathematics • Understanding Linear Equations</p>
+        </footer>
+    </div>
+
+    <script>
+        // Part 1: Linear equation examples functionality
+        const numberLineCanvas = document.getElementById('numberLineCanvas');
+        const numberLineCtx = numberLineCanvas.getContext('2d');
+        const equationButtons = document.querySelectorAll('#part1 .controls button');
+        const currentEquationDisplay = document.getElementById('currentEquation');
+        const solutionDisplay = document.getElementById('solutionDisplay');
+        
+        // Set canvas dimensions
+        numberLineCanvas.width = numberLineCanvas.offsetWidth;
+        numberLineCanvas.height = numberLineCanvas.offsetHeight;
+        
+        // Part 2: Comparison canvases
+        const linearComparisonCanvas = document.getElementById('linearComparisonCanvas');
+        const linearComparisonCtx = linearComparisonCanvas.getContext('2d');
+        const nonLinearComparisonCanvas = document.getElementById('nonLinearComparisonCanvas');
+        const nonLinearComparisonCtx = nonLinearComparisonCanvas.getContext('2d');
+        const comparisonButtons = document.querySelectorAll('#part2 .comparison-controls button');
+        const linearComparisonEquation = document.getElementById('linearComparisonEquation');
+        const nonLinearComparisonEquation = document.getElementById('nonLinearComparisonEquation');
+        const linearSolutionDisplay = document.getElementById('linearSolutionDisplay');
+        const nonLinearSolutionDisplay = document.getElementById('nonLinearSolutionDisplay');
+        
+        linearComparisonCanvas.width = linearComparisonCanvas.offsetWidth;
+        linearComparisonCanvas.height = linearComparisonCanvas.offsetHeight;
+        nonLinearComparisonCanvas.width = nonLinearComparisonCanvas.offsetWidth;
+        nonLinearComparisonCanvas.height = nonLinearComparisonCanvas.offsetHeight;
+        
+        // Part 3: Solution checking
+        const solutionCanvas = document.getElementById('solutionCanvas');
+        const solutionCtx = solutionCanvas.getContext('2d');
+        const checkEquation = document.getElementById('checkEquation');
+        const xValueInput = document.getElementById('xValue');
+        const checkSolutionButton = document.getElementById('checkSolution');
+        const checkResult = document.getElementById('checkResult');
+        
+        solutionCanvas.width = solutionCanvas.offsetWidth;
+        solutionCanvas.height = solutionCanvas.offsetHeight;
+        
+        // Draw number line
+        function drawNumberLine(ctx, width, height, solution, equation) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const scale = 30; // Pixels per unit
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw number line
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(50, centerY);
+            ctx.lineTo(width - 50, centerY);
+            ctx.stroke();
+            
+            // Draw ticks and labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            for (let i = -5; i <= 15; i++) {
+                const x = 50 + (i + 5) * scale;
+                
+                // Draw tick
+                ctx.beginPath();
+                ctx.moveTo(x, centerY - 10);
+                ctx.lineTo(x, centerY + 10);
+                ctx.stroke();
+                
+                // Draw label
+                ctx.fillText(i, x, centerY + 25);
+            }
+            
+            // Highlight solution
+            if (solution !== null) {
+                const solutionX = 50 + (solution + 5) * scale;
+                
+                // Draw circle around solution
+                ctx.strokeStyle = '#2575fc';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(solutionX, centerY, 15, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Fill circle
+                ctx.fillStyle = '#2575fc';
+                ctx.beginPath();
+                ctx.arc(solutionX, centerY, 10, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Label solution
+                ctx.fillStyle = '#2575fc';
+                ctx.font = 'bold 16px Arial';
+                ctx.fillText('Solution', solutionX, centerY - 30);
+            }
+            
+            // Draw equation
+            ctx.fillStyle = '#6a11cb';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(equation, width / 2, 30);
+        }
+        
+        // Draw linear equation on number line
+        function drawLinearComparison(ctx, width, height, solution, equation) {
+            drawNumberLine(ctx, width, height, solution, equation);
+        }
+        
+        // Draw non-linear equation graph
+        function drawNonLinearGraph(ctx, width, height, equation) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const scale = 30; // Pixels per unit
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw coordinate system
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            
+            // Vertical grid lines
+            for (let x = centerX % scale; x < width; x += scale) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            // Horizontal grid lines
+            for (let y = centerY % scale; y < height; y += scale) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, height);
+            ctx.stroke();
+            
+            // Draw axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // X-axis labels
+            for (let i = -5; i <= 5; i++) {
+                if (i === 0) continue;
+                const x = centerX + i * scale;
+                ctx.fillText(i, x, centerY + 15);
+            }
+            
+            // Y-axis labels
+            for (let i = -5; i <= 5; i++) {
+                if (i === 0) continue;
+                const y = centerY - i * scale;
+                ctx.fillText(i, centerX - 15, y);
+            }
+            
+            // Origin label
+            ctx.fillText('0', centerX - 10, centerY + 15);
+            
+            // Draw the non-linear equation
+            ctx.strokeStyle = '#6a11cb';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            let firstPoint = true;
+            
+            for (let i = 0; i < width; i++) {
+                const x = (i - centerX) / scale;
+                let y;
+                
+                if (equation === 'x² = 16' || equation === 'x² - 4 = 0') {
+                    // For quadratic equations, we'll draw y = x²
+                    y = x * x;
+                    
+                    // Adjust for the equation
+                    if (equation === 'x² = 16') {
+                        y = y - 16;
+                    } else if (equation === 'x² - 4 = 0') {
+                        y = y - 4;
+                    }
+                } else if (equation === 'x³ - 8 = 0') {
+                    // For cubic equation
+                    y = x * x * x - 8;
+                }
+                
+                const canvasY = centerY - y * scale;
+                
+                if (firstPoint) {
+                    ctx.moveTo(i, canvasY);
+                    firstPoint = false;
+                } else {
+                    ctx.lineTo(i, canvasY);
+                }
+            }
+            
+            ctx.stroke();
+            
+            // Draw equation
+            ctx.fillStyle = '#6a11cb';
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(equation, width / 2, 30);
+            
+            // Mark solutions
+            let solutions = [];
+            if (equation === 'x² = 16') {
+                solutions = [4, -4];
+            } else if (equation === 'x² - 4 = 0') {
+                solutions = [2, -2];
+            } else if (equation === 'x³ - 8 = 0') {
+                solutions = [2];
+            }
+            
+            solutions.forEach(solution => {
+                const solutionX = centerX + solution * scale;
+                const solutionY = centerY;
+                
+                // Draw point at solution
+                ctx.fillStyle = '#ff5722';
+                ctx.beginPath();
+                ctx.arc(solutionX, solutionY, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw label
+                ctx.fillStyle = '#ff5722';
+                ctx.font = 'bold 14px Arial';
+                ctx.fillText(`x=${solution}`, solutionX, solutionY - 20);
+            });
+        }
+        
+        // Solve linear equation
+        function solveLinearEquation(equation) {
+            if (equation === '2x - 4 = 5 + x') {
+                return 9;
+            } else if (equation === '3x + 2 = 8 - x') {
+                return 1.5;
+            } else if (equation === '5x = 15') {
+                return 3;
+            }
+            return null;
+        }
+        
+        // Solve non-linear equation
+        function solveNonLinearEquation(equation) {
+            if (equation === 'x² = 16') {
+                return [4, -4];
+            } else if (equation === 'x² - 4 = 0') {
+                return [2, -2];
+            } else if (equation === 'x³ - 8 = 0') {
+                return [2];
+            }
+            return [];
+        }
+        
+        // Part 1: Draw the initial number line
+        const initialEquation = '2x - 4 = 5 + x';
+        const initialSolution = solveLinearEquation(initialEquation);
+        drawNumberLine(numberLineCtx, numberLineCanvas.width, numberLineCanvas.height, initialSolution, initialEquation);
+        
+        // Add event listeners to equation buttons
+        equationButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                equationButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Get the equation from data attribute
+                const equation = this.getAttribute('data-equation');
+                currentEquationDisplay.textContent = equation;
+                
+                // Solve the equation
+                const solution = solveLinearEquation(equation);
+                solutionDisplay.textContent = `Solution: x = ${solution}`;
+                
+                // Draw the new number line
+                drawNumberLine(numberLineCtx, numberLineCanvas.width, numberLineCanvas.height, solution, equation);
+            });
+        });
+        
+        // Part 2: Comparison section functionality
+        function updateComparisonGraphs(linearEquation, nonLinearEquation) {
+            // Update equation displays
+            linearComparisonEquation.textContent = linearEquation;
+            nonLinearComparisonEquation.textContent = nonLinearEquation;
+            
+            // Solve equations
+            const linearSolution = solveLinearEquation(linearEquation);
+            const nonLinearSolutions = solveNonLinearEquation(nonLinearEquation);
+            
+            // Update solution displays
+            linearSolutionDisplay.textContent = `One solution: x = ${linearSolution}`;
+            nonLinearSolutionDisplay.textContent = `Solutions: ${nonLinearSolutions.map(s => `x = ${s}`).join(', ')}`;
+            
+            // Draw graphs
+            drawLinearComparison(linearComparisonCtx, linearComparisonCanvas.width, linearComparisonCanvas.height, linearSolution, linearEquation);
+            drawNonLinearGraph(nonLinearComparisonCtx, nonLinearComparisonCanvas.width, nonLinearComparisonCanvas.height, nonLinearEquation);
+        }
+        
+        // Initialize comparison graphs
+        updateComparisonGraphs('2x - 4 = 5 + x', 'x² = 16');
+        
+        // Add event listeners to comparison buttons
+        comparisonButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                comparisonButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Get the equations from data attributes
+                const linearEquation = this.getAttribute('data-linear');
+                const nonLinearEquation = this.getAttribute('data-nonlinear');
+                
+                updateComparisonGraphs(linearEquation, nonLinearEquation);
+            });
+        });
+        
+        // Part 3: Solution checking functionality
+        function checkIfSolution(x, equation) {
+            if (equation === '2x - 4 = 5 + x') {
+                const left = 2 * x - 4;
+                const right = 5 + x;
+                return left === right;
+            }
+            return false;
+        }
+        
+        function updateSolutionGraph(x, equation) {
+            const centerX = solutionCanvas.width / 2;
+            const centerY = solutionCanvas.height / 2;
+            const scale = 30; // Pixels per unit
+            
+            // Clear canvas
+            solutionCtx.clearRect(0, 0, solutionCanvas.width, solutionCanvas.height);
+            
+            // Draw number line
+            solutionCtx.strokeStyle = '#333';
+            solutionCtx.lineWidth = 2;
+            solutionCtx.beginPath();
+            solutionCtx.moveTo(50, centerY);
+            solutionCtx.lineTo(solutionCanvas.width - 50, centerY);
+            solutionCtx.stroke();
+            
+            // Draw ticks and labels
+            solutionCtx.fillStyle = '#333';
+            solutionCtx.font = '14px Arial';
+            solutionCtx.textAlign = 'center';
+            solutionCtx.textBaseline = 'middle';
+            
+            for (let i = 0; i <= 15; i++) {
+                const posX = 50 + i * scale;
+                
+                // Draw tick
+                solutionCtx.beginPath();
+                solutionCtx.moveTo(posX, centerY - 10);
+                solutionCtx.lineTo(posX, centerY + 10);
+                solutionCtx.stroke();
+                
+                // Draw label
+                solutionCtx.fillText(i, posX, centerY + 25);
+            }
+            
+            // Mark the tested point
+            const pointX = 50 + x * scale;
+            
+            // Draw point
+            solutionCtx.fillStyle = '#6a11cb';
+            solutionCtx.beginPath();
+            solutionCtx.arc(pointX, centerY, 10, 0, Math.PI * 2);
+            solutionCtx.fill();
+            
+            // Label the point
+            solutionCtx.fillStyle = '#6a11cb';
+            solutionCtx.font = 'bold 16px Arial';
+            solutionCtx.fillText(`x = ${x}`, pointX, centerY - 30);
+            
+            // Draw equation
+            solutionCtx.fillStyle = '#2575fc';
+            solutionCtx.font = 'bold 18px Arial';
+            solutionCtx.textAlign = 'center';
+            solutionCtx.fillText(equation, solutionCanvas.width / 2, 30);
+        }
+        
+        // Initialize solution graph
+        updateSolutionGraph(5, '2x - 4 = 5 + x');
+        
+        // Add event listener to check solution button
+        checkSolutionButton.addEventListener('click', function() {
+            const x = parseFloat(xValueInput.value);
+            const equation = checkEquation.textContent;
+            const isSolution = checkIfSolution(x, equation);
+            
+            updateSolutionGraph(x, equation);
+            
+            if (isSolution) {
+                checkResult.textContent = `Correct! x = ${x} is a solution.`;
+                checkResult.className = 'result correct';
+            } else {
+                checkResult.textContent = `Incorrect! x = ${x} is not a solution.`;
+                checkResult.className = 'result incorrect';
+            }
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            // Part 1
+            numberLineCanvas.width = numberLineCanvas.offsetWidth;
+            numberLineCanvas.height = numberLineCanvas.offsetHeight;
+            
+            const activeLinearButton = document.querySelector('#part1 .controls button.active');
+            const linearEquation = activeLinearButton.getAttribute('data-equation');
+            const solution = solveLinearEquation(linearEquation);
+            
+            drawNumberLine(numberLineCtx, numberLineCanvas.width, numberLineCanvas.height, solution, linearEquation);
+            
+            // Part 2
+            linearComparisonCanvas.width = linearComparisonCanvas.offsetWidth;
+            linearComparisonCanvas.height = linearComparisonCanvas.offsetHeight;
+            nonLinearComparisonCanvas.width = nonLinearComparisonCanvas.offsetWidth;
+            nonLinearComparisonCanvas.height = nonLinearComparisonCanvas.offsetHeight;
+            
+            const activeComparisonButton = document.querySelector('#part2 .comparison-controls button.active');
+            const comparisonLinearEquation = activeComparisonButton.getAttribute('data-linear');
+            const comparisonNonLinearEquation = activeComparisonButton.getAttribute('data-nonlinear');
+            
+            updateComparisonGraphs(comparisonLinearEquation, comparisonNonLinearEquation);
+            
+            // Part 3
+            solutionCanvas.width = solutionCanvas.offsetWidth;
+            solutionCanvas.height = solutionCanvas.offsetHeight;
+            
+            const x = parseFloat(xValueInput.value);
+            const equation = checkEquation.textContent;
+            updateSolutionGraph(x, equation);
+        });
+    </script>
+</body>
+</html>
