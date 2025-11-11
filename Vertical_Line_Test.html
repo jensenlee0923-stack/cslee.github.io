@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Line Test - Function Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-top: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        
+        .explanation {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .explanation h2 {
+            margin-bottom: 10px;
+            color: #fdbb2d;
+        }
+        
+        .function-def {
+            font-style: italic;
+            margin: 15px 0;
+            padding-left: 15px;
+            border-left: 3px solid #fdbb2d;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+        }
+        
+        .btn {
+            background: #1a2a6c;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:hover {
+            background: #2a3a9c;
+            transform: translateY(-2px);
+        }
+        
+        .btn.active {
+            background: #fdbb2d;
+            color: #1a2a6c;
+            font-weight: bold;
+        }
+        
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            margin: 0 auto 25px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 400px;
+            cursor: crosshair;
+        }
+        
+        .slider-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .slider-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        input[type="range"] {
+            width: 80%;
+            max-width: 500px;
+            height: 10px;
+            border-radius: 5px;
+            background: #1a2a6c;
+            outline: none;
+        }
+        
+        .result {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .function-result {
+            background: rgba(26, 188, 156, 0.3);
+            border: 2px solid #1abc9c;
+        }
+        
+        .not-function-result {
+            background: rgba(231, 76, 60, 0.3);
+            border: 2px solid #e74c3c;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            canvas {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Vertical Line Test</h1>
+        <p class="subtitle">Visualizing Functions in Mathematics</p>
+    </header>
+    
+    <div class="container">
+        <div class="explanation">
+            <h2>What is the Vertical Line Test?</h2>
+            <p>The vertical line test is a visual way to determine if a graph represents a function. If any vertical line intersects the graph at more than one point, then the graph does not represent a function.</p>
+            
+            <p class="function-def">A function is a relation where each input (x-value) has exactly one output (y-value).</p>
+            
+            <p>Use the controls below to test different graphs. Move the vertical line across the graph to see if it passes the test!</p>
+        </div>
+        
+        <div class="controls">
+            <button class="btn active" id="lineBtn">Line (Function)</button>
+            <button class="btn" id="parabolaBtn">Parabola (Function)</button>
+            <button class="btn" id="circleBtn">Circle (Not a Function)</button>
+            <button class="btn" id="drawBtn">Draw Your Own</button>
+            <button class="btn" id="clearBtn">Clear Drawing</button>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="graphCanvas" width="800" height="400"></canvas>
+        </div>
+        
+        <div class="slider-container">
+            <span class="slider-label">Move the vertical line:</span>
+            <input type="range" id="lineSlider" min="0" max="800" value="400">
+        </div>
+        
+        <div class="result function-result" id="result">
+            Move the vertical line to test the graph!
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Created to demonstrate the Vertical Line Test for functions | Mathematics Visualization</p>
+    </div>
+
+    <script>
+        // Canvas setup
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        const lineSlider = document.getElementById('lineSlider');
+        const resultDiv = document.getElementById('result');
+        
+        // Button references
+        const lineBtn = document.getElementById('lineBtn');
+        const parabolaBtn = document.getElementById('parabolaBtn');
+        const circleBtn = document.getElementById('circleBtn');
+        const drawBtn = document.getElementById('drawBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        
+        // State variables
+        let currentGraph = 'line';
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let drawnPaths = [];
+        let currentPath = [];
+        
+        // Draw coordinate system
+        function drawCoordinateSystem() {
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Clear canvas with white background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            
+            // Vertical grid lines
+            for (let x = 0; x <= width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            
+            // Horizontal grid lines
+            for (let y = 0; y <= height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+            
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(0, height/2);
+            ctx.lineTo(width, height/2);
+            ctx.stroke();
+            
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(width/2, 0);
+            ctx.lineTo(width/2, height);
+            ctx.stroke();
+            
+            // Draw axis labels
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText('x', width - 10, height/2 - 10);
+            ctx.fillText('y', width/2 + 10, 20);
+            
+            // Draw scale markers
+            for (let x = width/2 + 50; x < width; x += 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, height/2 - 5);
+                ctx.lineTo(x, height/2 + 5);
+                ctx.stroke();
+                ctx.fillText((x - width/2)/50, x - 5, height/2 + 20);
+            }
+            
+            for (let x = width/2 - 50; x > 0; x -= 50) {
+                ctx.beginPath();
+                ctx.moveTo(x, height/2 - 5);
+                ctx.lineTo(x, height/2 + 5);
+                ctx.stroke();
+                ctx.fillText((x - width/2)/50, x - 5, height/2 + 20);
+            }
+            
+            for (let y = height/2 + 50; y < height; y += 50) {
+                ctx.beginPath();
+                ctx.moveTo(width/2 - 5, y);
+                ctx.lineTo(width/2 + 5, y);
+                ctx.stroke();
+                ctx.fillText((height/2 - y)/50, width/2 + 10, y + 5);
+            }
+            
+            for (let y = height/2 - 50; y > 0; y -= 50) {
+                ctx.beginPath();
+                ctx.moveTo(width/2 - 5, y);
+                ctx.lineTo(width/2 + 5, y);
+                ctx.stroke();
+                ctx.fillText((height/2 - y)/50, width/2 + 10, y + 5);
+            }
+        }
+        
+        // Draw the selected graph
+        function drawGraph() {
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            ctx.strokeStyle = '#1a2a6c';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            if (currentGraph === 'line') {
+                // Draw a line: y = -x/2
+                for (let x = 0; x <= width; x++) {
+                    const y = height/2 - (x - width/2)/2;
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+            } else if (currentGraph === 'parabola') {
+                // Draw a parabola: y = (x-400)^2 / 200 - 200
+                for (let x = 0; x <= width; x++) {
+                    const relX = (x - width/2) / 50;
+                    const y = height/2 - relX * relX * 10;
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+            } else if (currentGraph === 'circle') {
+                // Draw a circle: (x-400)^2 + (y-200)^2 = 10000
+                const centerX = width/2;
+                const centerY = height/2;
+                const radius = 150;
+                
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            }
+            
+            ctx.stroke();
+        }
+        
+        // Draw the vertical line
+        function drawVerticalLine(x) {
+            ctx.strokeStyle = '#e74c3c';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        // Redraw all user-drawn paths
+        function redrawPaths() {
+            ctx.strokeStyle = '#1a2a6c';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            
+            for (const path of drawnPaths) {
+                if (path.length > 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(path[0].x, path[0].y);
+                    
+                    for (let i = 1; i < path.length; i++) {
+                        ctx.lineTo(path[i].x, path[i].y);
+                    }
+                    
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw the current path if we're in the middle of drawing
+            if (currentPath.length > 0) {
+                ctx.beginPath();
+                ctx.moveTo(currentPath[0].x, currentPath[0].y);
+                
+                for (let i = 1; i < currentPath.length; i++) {
+                    ctx.lineTo(currentPath[i].x, currentPath[i].y);
+                }
+                
+                ctx.stroke();
+            }
+        }
+        
+        // Count intersections with the vertical line for drawn paths
+        function countDrawnIntersections(x) {
+            if (drawnPaths.length === 0 && currentPath.length === 0) {
+                return 0;
+            }
+            
+            // Check all paths for intersections with the vertical line
+            let totalIntersections = 0;
+            const allPaths = [...drawnPaths];
+            
+            if (currentPath.length > 0) {
+                allPaths.push(currentPath);
+            }
+            
+            for (const path of allPaths) {
+                if (path.length < 2) continue;
+                
+                // Check each segment in the path
+                for (let i = 0; i < path.length - 1; i++) {
+                    const p1 = path[i];
+                    const p2 = path[i+1];
+                    
+                    // Check if the segment crosses the vertical line
+                    if ((p1.x <= x && p2.x >= x) || (p1.x >= x && p2.x <= x)) {
+                        // Calculate the y-coordinate where the segment crosses the line
+                        const t = (x - p1.x) / (p2.x - p1.x);
+                        const y = p1.y + t * (p2.y - p1.y);
+                        
+                        // Count this as an intersection
+                        totalIntersections++;
+                    }
+                }
+            }
+            
+            return totalIntersections;
+        }
+        
+        // Count intersections with the vertical line
+        function countIntersections(x) {
+            // For predefined graphs, we calculate intersections mathematically
+            if (currentGraph === 'line') {
+                // Line always has one intersection with vertical line
+                return 1;
+            } else if (currentGraph === 'parabola') {
+                // Parabola always has one intersection with vertical line
+                return 1;
+            } else if (currentGraph === 'circle') {
+                // Circle can have 0, 1, or 2 intersections
+                const centerX = canvas.width/2;
+                const centerY = canvas.height/2;
+                const radius = 150;
+                
+                const distance = Math.abs(x - centerX);
+                if (distance > radius) return 0;
+                if (distance === radius) return 1;
+                return 2;
+            } else if (currentGraph === 'draw') {
+                // For drawn graphs, use our custom intersection detection
+                return countDrawnIntersections(x);
+            }
+            
+            return 0;
+        }
+        
+        // Update the display
+        function updateCanvas() {
+            drawCoordinateSystem();
+            
+            if (currentGraph !== 'draw') {
+                drawGraph();
+            } else {
+                redrawPaths();
+            }
+            
+            drawVerticalLine(parseInt(lineSlider.value));
+            
+            const intersections = countIntersections(parseInt(lineSlider.value));
+            
+            // Update result display
+            if (intersections === 0) {
+                resultDiv.textContent = "No intersections - This relation might not be defined at this x-value.";
+                resultDiv.className = "result";
+            } else if (intersections === 1) {
+                resultDiv.textContent = "✅ Exactly one intersection - This passes the vertical line test!";
+                resultDiv.className = "result function-result";
+            } else {
+                resultDiv.textContent = "❌ Multiple intersections - This fails the vertical line test! Not a function.";
+                resultDiv.className = "result not-function-result";
+            }
+        }
+        
+        // Event listeners for buttons
+        lineBtn.addEventListener('click', () => {
+            currentGraph = 'line';
+            setActiveButton(lineBtn);
+            updateCanvas();
+        });
+        
+        parabolaBtn.addEventListener('click', () => {
+            currentGraph = 'parabola';
+            setActiveButton(parabolaBtn);
+            updateCanvas();
+        });
+        
+        circleBtn.addEventListener('click', () => {
+            currentGraph = 'circle';
+            setActiveButton(circleBtn);
+            updateCanvas();
+        });
+        
+        drawBtn.addEventListener('click', () => {
+            currentGraph = 'draw';
+            setActiveButton(drawBtn);
+            updateCanvas();
+        });
+        
+        clearBtn.addEventListener('click', () => {
+            if (currentGraph === 'draw') {
+                drawnPaths = [];
+                currentPath = [];
+                updateCanvas();
+            }
+        });
+        
+        // Set active button style
+        function setActiveButton(activeBtn) {
+            [lineBtn, parabolaBtn, circleBtn, drawBtn].forEach(btn => {
+                btn.classList.remove('active');
+            });
+            activeBtn.classList.add('active');
+        }
+        
+        // Drawing functionality
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        function startDrawing(e) {
+            if (currentGraph === 'draw') {
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                currentPath = [{x, y}];
+            }
+        }
+        
+        function draw(e) {
+            if (!isDrawing || currentGraph !== 'draw') return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            currentPath.push({x, y});
+            
+            // Redraw everything
+            drawCoordinateSystem();
+            redrawPaths();
+            drawVerticalLine(parseInt(lineSlider.value));
+        }
+        
+        function stopDrawing() {
+            if (isDrawing && currentGraph === 'draw') {
+                isDrawing = false;
+                
+                if (currentPath.length > 0) {
+                    drawnPaths.push([...currentPath]);
+                    currentPath = [];
+                }
+                
+                updateCanvas();
+            }
+        }
+        
+        // Initialize
+        lineSlider.addEventListener('input', updateCanvas);
+        updateCanvas();
+    </script>
+</body>
+</html>
