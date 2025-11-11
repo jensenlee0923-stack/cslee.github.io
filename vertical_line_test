@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Function or Not?</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: #f9f9f9; }
+    canvas { border: 1px solid black; margin-top: 10px; background: white; cursor: crosshair; }
+    #info { max-width: 600px; margin: auto; padding: 10px; }
+    button { margin: 5px; padding: 8px 12px; font-size: 14px; }
+    input[type="range"] { width: 300px; }
+  </style>
+</head>
+<body>
+  <h1>Is it a Function?</h1>
+  <div id="info">
+    <p>Use the <strong>vertical line test</strong> to check if a graph represents a function. 
+    If a vertical line crosses the graph more than once, it's <em>not</em> a function.</p>
+  </div>
+
+  <div>
+    <button onclick="setGraph('line')">Line (Function)</button>
+    <button onclick="setGraph('parabola')">Parabola (Function)</button>
+    <button onclick="setGraph('circle')">Circle (Not a Function)</button>
+    <button onclick="setGraph('draw')">✍️ Draw Your Own</button>
+    <button onclick="clearCanvas()">🧹 Clear Drawing</button>
+  </div>
+
+  <canvas id="graphCanvas" width="500" height="400"></canvas>
+  <br>
+  <label for="lineX">Move vertical line:</label>
+  <input type="range" id="lineX" min="0" max="500" value="250">
+
+  <script>
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const lineSlider = document.getElementById('lineX');
+    let currentGraph = 'circle';
+    let isDrawing = false;
+
+    function setGraph(type) {
+      currentGraph = type;
+      updateCanvas();
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (currentGraph !== 'draw') drawGraph();
+      updateCanvas();
+    }
+
+    function drawGraph() {
+      ctx.beginPath();
+      if (currentGraph === 'line') {
+        ctx.moveTo(50, 350);
+        ctx.lineTo(450, 50);
+      } else if (currentGraph === 'parabola') {
+        for (let x = -100; x <= 100; x++) {
+          let px = 250 + x;
+          let py = 300 - 0.01 * x * x;
+          if (x === -100) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+      } else if (currentGraph === 'circle') {
+        ctx.arc(250, 200, 100, 0, 2 * Math.PI);
+      }
+      ctx.strokeStyle = 'black';
+      ctx.stroke();
+    }
+
+    function drawVerticalLine(x) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.strokeStyle = 'red';
+      ctx.stroke();
+    }
+
+    function countIntersections(x) {
+      let count = 0;
+      const imageData = ctx.getImageData(x, 0, 1, canvas.height).data;
+      for (let y = 0; y < canvas.height; y++) {
+        const index = y * 4;
+        const alpha = imageData[index + 3];
+        if (alpha > 0) count++;
+      }
+      return count;
+    }
+
+    function updateCanvas() {
+      if (currentGraph !== 'draw') {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGraph();
+      }
+      drawVerticalLine(lineSlider.value);
+      const hits = countIntersections(parseInt(lineSlider.value));
+      document.getElementById('info').innerHTML = `
+        <p>Vertical line at x = ${lineSlider.value} intersects the graph <strong>${hits}</strong> time(s).</p>
+        <p>${hits > 1 ? "❌ Not a function" : "✅ This is a function"}</p>
+      `;
+    }
+
+    lineSlider.addEventListener('input', updateCanvas);
+
+    // Drawing tool
+    canvas.addEventListener('mousedown', e => {
+      if (currentGraph === 'draw') {
+        isDrawing = true;
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+      }
+    });
+
+    canvas.addEventListener('mousemove', e => {
+      if (isDrawing && currentGraph === 'draw') {
+        ctx.lineTo(e.offsetX, e.offsetY);
+        ctx.strokeStyle = 'black';
+        ctx.stroke();
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+      updateCanvas();
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      isDrawing = false;
+    });
+
+    updateCanvas();
+  </script>
+</body>
+</html>
