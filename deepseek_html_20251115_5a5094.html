@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quadratic Graph Explorer</title>
+    <style>
+        :root { 
+            --bg: #f7f9fc; 
+            --card: #ffffff; 
+            --muted: #6b7280; 
+            --accent: #0f62fe; 
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: #111;
+            line-height: 1.5;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #0f62fe22, transparent);
+            padding: 12px 20px;
+            border-bottom: 1px solid #e6eefc;
+        }
+        
+        .main-title {
+            font-size: 1.6rem;
+            margin: 0 0 2px;
+            color: #0f62fe;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            margin: 0;
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .container {
+            display: flex;
+            height: calc(100vh - 70px);
+            padding: 0;
+        }
+        
+        .controls-panel {
+            width: 400px;
+            background: var(--card);
+            padding: 16px;
+            overflow-y: auto;
+            border-right: 1px solid #e6eefc;
+            box-shadow: 2px 0 8px rgba(15, 40, 80, 0.06);
+        }
+        
+        .graph-panel {
+            flex: 1;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card {
+            background: var(--card);
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(15, 40, 80, 0.06);
+        }
+        
+        .controls label {
+            display: block;
+            font-weight: 600;
+            margin: 8px 0 6px;
+            font-size: 0.9rem;
+        }
+        
+        .row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 6px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .stat {
+            background: #f3f7ff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        
+        canvas {
+            width: 100%;
+            flex: 1;
+            border-radius: 8px;
+            background: linear-gradient(180deg, #ffffff, #f6f8ff);
+            border: 1px solid #e6eefc;
+        }
+        
+        .examples {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        button.preset {
+            background: #fff;
+            border: 1px solid #e6eefc;
+            padding: 6px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        
+        button.preset:hover {
+            background: #f3f7ff;
+            border-color: var(--accent);
+        }
+        
+        .note {
+            color: var(--muted);
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+        
+        h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+        
+        .form-toggle {
+            display: flex;
+            margin: 10px 0;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #e6eefc;
+        }
+        
+        .form-toggle button {
+            flex: 1;
+            padding: 8px;
+            background: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .form-toggle button.active {
+            background: #0f62fe;
+            color: white;
+        }
+        
+        .vertex-controls {
+            display: none;
+        }
+        
+        .graph-title {
+            margin: 0 0 8px;
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .controls-panel {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e6eefc;
+            }
+            
+            .graph-panel {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h1 class="main-title">2526 S4 Core Mathematics</h1>
+            <p class="subtitle">CCSC - Quadratic Graph Explorer</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="controls-panel">
+            <div class="card controls" aria-label="controls">
+                <h2>Coefficients</h2>
+                
+                <div class="form-toggle">
+                    <button id="standardFormBtn" class="active">Standard Form</button>
+                    <button id="vertexFormBtn">Vertex Form</button>
+                </div>
+                
+                <div class="standard-controls">
+                    <label for="a">a (quadratic coefficient)</label>
+                    <div class="row">
+                        <input id="a_range" type="range" min="-5" max="5" step="0.1" value="1">
+                        <input id="a_num" type="number" min="-50" max="50" step="0.1" value="1">
+                    </div>
+
+                    <label for="b">b (linear coefficient)</label>
+                    <div class="row">
+                        <input id="b_range" type="range" min="-10" max="10" step="0.1" value="0">
+                        <input id="b_num" type="number" min="-100" max="100" step="0.1" value="0">
+                    </div>
+
+                    <label for="c">c (constant term)</label>
+                    <div class="row">
+                        <input id="c_range" type="range" min="-20" max="20" step="0.1" value="0">
+                        <input id="c_num" type="number" min="-200" max="200" step="0.1" value="0">
+                    </div>
+                </div>
+                
+                <div class="vertex-controls">
+                    <label for="a_vertex">a (shape)</label>
+                    <div class="row">
+                        <input id="a_vertex_range" type="range" min="-5" max="5" step="0.1" value="1">
+                        <input id="a_vertex_num" type="number" min="-50" max="50" step="0.1" value="1">
+                    </div>
+
+                    <label for="h">h (x-coordinate of vertex)</label>
+                    <div class="row">
+                        <input id="h_range" type="range" min="-10" max="10" step="0.1" value="0">
+                        <input id="h_num" type="number" min="-100" max="100" step="0.1" value="0">
+                    </div>
+
+                    <label for="k">k (y-coordinate of vertex)</label>
+                    <div class="row">
+                        <input id="k_range" type="range" min="-20" max="20" step="0.1" value="0">
+                        <input id="k_num" type="number" min="-200" max="200" step="0.1" value="0">
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat"><strong>Standard:</strong> <span id="equation">y = x²</span></div>
+                    <div class="stat"><strong>Vertex:</strong> <span id="vertexForm">y = (x - 0)² + 0</span></div>
+                    <div class="stat"><strong>Vertex:</strong> <span id="vertex">(0.000, 0.000)</span></div>
+                    <div class="stat"><strong>Axis:</strong> <span id="axis">x = 0.000</span></div>
+                    <div class="stat"><strong>Discriminant:</strong> <span id="disc">0.000</span></div>
+                    <div class="stat"><strong>Roots:</strong> <span id="roots">0.000 (double)</span></div>
+                </div>
+
+                <div class="examples">
+                    <button class="preset" data-a="1" data-b="0" data-c="0">y = x²</button>
+                    <button class="preset" data-a="1" data-b="-2" data-c="1">y = x² - 2x + 1</button>
+                    <button class="preset" data-a="-1" data-b="0" data-c="0">y = -x²</button>
+                    <button class="preset" data-a="0.5" data-b="0" data-c="-3">wider, down</button>
+                </div>
+
+                <p class="note"><strong>Tip:</strong> Drag to pan, scroll to zoom. Use presets for examples.</p>
+            </div>
+        </section>
+
+        <section class="graph-panel">
+            <div class="card">
+                <h2 class="graph-title">Graph</h2>
+                <canvas id="canvas"></canvas>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Quadratic Graph Explorer JavaScript
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Initial settings
+        let width, height;
+        let scale = 40; // pixels per unit
+        let offsetX, offsetY;
+
+        // Control elements
+        const aRange = document.getElementById('a_range');
+        const bRange = document.getElementById('b_range');
+        const cRange = document.getElementById('c_range');
+        const aNum = document.getElementById('a_num');
+        const bNum = document.getElementById('b_num');
+        const cNum = document.getElementById('c_num');
+        
+        const aVertexRange = document.getElementById('a_vertex_range');
+        const hRange = document.getElementById('h_range');
+        const kRange = document.getElementById('k_range');
+        const aVertexNum = document.getElementById('a_vertex_num');
+        const hNum = document.getElementById('h_num');
+        const kNum = document.getElementById('k_num');
+        
+        const equationEl = document.getElementById('equation');
+        const vertexFormEl = document.getElementById('vertexForm');
+        const vertexEl = document.getElementById('vertex');
+        const axisEl = document.getElementById('axis');
+        const discEl = document.getElementById('disc');
+        const rootsEl = document.getElementById('roots');
+        const presets = document.querySelectorAll('.preset');
+        
+        const standardFormBtn = document.getElementById('standardFormBtn');
+        const vertexFormBtn = document.getElementById('vertexFormBtn');
+        const standardControls = document.querySelector('.standard-controls');
+        const vertexControls = document.querySelector('.vertex-controls');
+
+        // Set up form toggle
+        standardFormBtn.addEventListener('click', () => {
+            standardFormBtn.classList.add('active');
+            vertexFormBtn.classList.remove('active');
+            standardControls.style.display = 'block';
+            vertexControls.style.display = 'none';
+        });
+        
+        vertexFormBtn.addEventListener('click', () => {
+            vertexFormBtn.classList.add('active');
+            standardFormBtn.classList.remove('active');
+            standardControls.style.display = 'none';
+            vertexControls.style.display = 'block';
+            
+            // Convert current standard form to vertex form
+            const {a, b, c} = getCoeffs();
+            const h = -b/(2*a);
+            const k = a*h*h + b*h + c;
+            
+            aVertexNum.value = a;
+            aVertexRange.value = a;
+            hNum.value = h.toFixed(2);
+            hRange.value = h.toFixed(2);
+            kNum.value = k.toFixed(2);
+            kRange.value = k.toFixed(2);
+        });
+
+        // Get current coefficient values (standard form)
+        function getCoeffs() {
+            return {
+                a: parseFloat(aNum.value),
+                b: parseFloat(bNum.value),
+                c: parseFloat(cNum.value)
+            };
+        }
+        
+        // Get current vertex form values
+        function getVertexCoeffs() {
+            return {
+                a: parseFloat(aVertexNum.value),
+                h: parseFloat(hNum.value),
+                k: parseFloat(kNum.value)
+            };
+        }
+        
+        // Convert vertex form to standard form
+        function vertexToStandard(a, h, k) {
+            return {
+                a: a,
+                b: -2 * a * h,
+                c: a * h * h + k
+            };
+        }
+        
+        // Convert standard form to vertex form
+        function standardToVertex(a, b, c) {
+            const h = -b/(2*a);
+            const k = a*h*h + b*h + c;
+            return {a, h, k};
+        }
+
+        // Sync controls when range inputs change (standard form)
+        function syncFromRange() {
+            aNum.value = aRange.value;
+            bNum.value = bRange.value;
+            cNum.value = cRange.value;
+            
+            // Update vertex form if it's active
+            if (vertexFormBtn.classList.contains('active')) {
+                const {a, b, c} = getCoeffs();
+                const {h, k} = standardToVertex(a, b, c);
+                
+                aVertexNum.value = a;
+                aVertexRange.value = a;
+                hNum.value = h.toFixed(2);
+                hRange.value = h.toFixed(2);
+                kNum.value = k.toFixed(2);
+                kRange.value = k.toFixed(2);
+            }
+            
+            drawAll();
+        }
+        
+        // Sync controls when vertex form range inputs change
+        function syncFromVertexRange() {
+            aVertexNum.value = aVertexRange.value;
+            hNum.value = hRange.value;
+            kNum.value = kRange.value;
+            
+            // Update standard form
+            const {a, h, k} = getVertexCoeffs();
+            const {b, c} = vertexToStandard(a, h, k);
+            
+            aNum.value = a;
+            aRange.value = a;
+            bNum.value = b.toFixed(2);
+            bRange.value = b.toFixed(2);
+            cNum.value = c.toFixed(2);
+            cRange.value = c.toFixed(2);
+            
+            drawAll();
+        }
+
+        // Sync controls when number inputs change (standard form)
+        function syncFromNumber() {
+            aRange.value = aNum.value;
+            bRange.value = bNum.value;
+            cRange.value = cNum.value;
+            
+            // Update vertex form if it's active
+            if (vertexFormBtn.classList.contains('active')) {
+                const {a, b, c} = getCoeffs();
+                const {h, k} = standardToVertex(a, b, c);
+                
+                aVertexNum.value = a;
+                aVertexRange.value = a;
+                hNum.value = h.toFixed(2);
+                hRange.value = h.toFixed(2);
+                kNum.value = k.toFixed(2);
+                kRange.value = k.toFixed(2);
+            }
+            
+            drawAll();
+        }
+        
+        // Sync controls when vertex form number inputs change
+        function syncFromVertexNumber() {
+            aVertexRange.value = aVertexNum.value;
+            hRange.value = hNum.value;
+            kRange.value = kNum.value;
+            
+            // Update standard form
+            const {a, h, k} = getVertexCoeffs();
+            const {b, c} = vertexToStandard(a, h, k);
+            
+            aNum.value = a;
+            aRange.value = a;
+            bNum.value = b.toFixed(2);
+            bRange.value = b.toFixed(2);
+            cNum.value = c.toFixed(2);
+            cRange.value = c.toFixed(2);
+            
+            drawAll();
+        }
+
+        // Set up event listeners for controls
+        aRange.addEventListener('input', syncFromRange);
+        bRange.addEventListener('input', syncFromRange);
+        cRange.addEventListener('input', syncFromRange);
+        aNum.addEventListener('input', syncFromNumber);
+        bNum.addEventListener('input', syncFromNumber);
+        cNum.addEventListener('input', syncFromNumber);
+        
+        aVertexRange.addEventListener('input', syncFromVertexRange);
+        hRange.addEventListener('input', syncFromVertexRange);
+        kRange.addEventListener('input', syncFromVertexRange);
+        aVertexNum.addEventListener('input', syncFromVertexNumber);
+        hNum.addEventListener('input', syncFromVertexNumber);
+        kNum.addEventListener('input', syncFromVertexNumber);
+
+        // Set up event listeners for preset buttons
+        presets.forEach(btn => {
+            btn.addEventListener('click', () => {
+                aNum.value = btn.dataset.a;
+                bNum.value = btn.dataset.b;
+                cNum.value = btn.dataset.c;
+                syncFromNumber();
+                
+                // Switch to standard form when using presets
+                standardFormBtn.click();
+            });
+        });
+
+        // Coordinate conversion functions
+        function toCanvasX(x) {
+            return offsetX + x * scale;
+        }
+
+        function toCanvasY(y) {
+            return offsetY - y * scale;
+        }
+
+        function toWorldX(px) {
+            return (px - offsetX) / scale;
+        }
+
+        function toWorldY(py) {
+            return (offsetY - py) / scale;
+        }
+
+        // Draw coordinate grid
+        function drawGrid() {
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            ctx.lineWidth = 1;
+
+            // Draw grid lines
+            const left = toWorldX(0);
+            const right = toWorldX(width);
+            const top = toWorldY(0);
+            const bottom = toWorldY(height);
+
+            // Vertical grid lines
+            ctx.strokeStyle = '#eef3ff';
+            ctx.beginPath();
+            for (let x = Math.ceil(left); x <= Math.floor(right); x++) {
+                ctx.moveTo(toCanvasX(x), 0);
+                ctx.lineTo(toCanvasX(x), height);
+            }
+            
+            // Horizontal grid lines
+            for (let y = Math.ceil(bottom); y <= Math.floor(top); y++) {
+                ctx.moveTo(0, toCanvasY(y));
+                ctx.lineTo(width, toCanvasY(y));
+            }
+            ctx.stroke();
+
+            // Draw axes
+            ctx.strokeStyle = '#ccd8ff';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(0, toCanvasY(0));
+            ctx.lineTo(width, toCanvasY(0));
+            ctx.moveTo(toCanvasX(0), 0);
+            ctx.lineTo(toCanvasX(0), height);
+            ctx.stroke();
+
+            // Draw axis labels
+            ctx.fillStyle = '#334155';
+            ctx.font = '10px system-ui';
+            for (let x = Math.ceil(left); x <= Math.floor(right); x++) {
+                if (x === 0) continue;
+                ctx.fillText(String(x), toCanvasX(x) + 2, toCanvasY(0) - 4);
+            }
+            for (let y = Math.ceil(bottom); y <= Math.floor(top); y++) {
+                if (y === 0) continue;
+                ctx.fillText(String(y), toCanvasX(0) + 4, toCanvasY(y) - 2);
+            }
+
+            // Draw origin label
+            ctx.fillText('0', toCanvasX(0) + 4, toCanvasY(0) + 12);
+            
+            ctx.restore();
+        }
+
+        // Plot the quadratic function
+        function plotQuadratic(a, b, c) {
+            ctx.save();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = '#0f62fe';
+            ctx.beginPath();
+
+            const leftX = toWorldX(0);
+            const rightX = toWorldX(width);
+            const step = Math.max((rightX - leftX) / 1200, 0.002);
+            
+            let first = true;
+            for (let x = leftX; x <= rightX; x += step) {
+                const y = a * x * x + b * x + c;
+                const px = toCanvasX(x);
+                const py = toCanvasY(y);
+                
+                if (first) {
+                    ctx.moveTo(px, py);
+                    first = false;
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+
+            // Draw vertex marker
+            const xv = -b / (2 * a);
+            const yv = a * xv * xv + b * xv + c;
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.arc(toCanvasX(xv), toCanvasY(yv), 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw axis of symmetry
+            ctx.save();
+            ctx.setLineDash([6, 6]);
+            ctx.strokeStyle = '#ffb86b';
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.moveTo(toCanvasX(xv), 0);
+            ctx.lineTo(toCanvasX(xv), height);
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.restore();
+        }
+
+        // Compute quadratic properties
+        function computeInfo(a, b, c) {
+            if (Math.abs(a) < 1e-9) {
+                // Linear function case
+                return {
+                    xv: 'N/A',
+                    yv: 'N/A',
+                    disc: 'N/A',
+                    rootsText: 'Linear: ' + (Math.abs(b) < 1e-9 ? 'none' : (-c / b).toFixed(4))
+                };
+            }
+
+            const xv = -b / (2 * a);
+            const yv = a * xv * xv + b * xv + c;
+            const disc = b * b - 4 * a * c;
+            let rootsText;
+
+            if (disc > 0) {
+                const r1 = (-b + Math.sqrt(disc)) / (2 * a);
+                const r2 = (-b - Math.sqrt(disc)) / (2 * a);
+                rootsText = r1.toFixed(3) + ', ' + r2.toFixed(3);
+            } else if (Math.abs(disc) < 1e-9) {
+                const r = -b / (2 * a);
+                rootsText = r.toFixed(3) + ' (double)';
+            } else {
+                rootsText = 'none (complex)';
+            }
+
+            return {
+                xv: xv,
+                yv: yv,
+                disc: disc,
+                rootsText: rootsText
+            };
+        }
+
+        // Format equation for display (standard form)
+        function formatEquation(a, b, c) {
+            if (Math.abs(a) < 1e-9) {
+                // Linear or constant
+                if (Math.abs(b) < 1e-9) return 'y = ' + c;
+                return 'y = ' + b + 'x' + (c !== 0 ? (c > 0 ? ' + ' + c : ' - ' + Math.abs(c)) : '');
+            }
+
+            function fmtNum(n) {
+                if (Math.abs(n - Math.round(n)) < 1e-9) return String(Math.round(n));
+                return String(n);
+            }
+
+            let parts = '';
+            
+            // Format a coefficient
+            if (a === 1) parts += 'x²';
+            else if (a === -1) parts += '-x²';
+            else parts += fmtNum(a) + 'x²';
+            
+            // Format b coefficient
+            if (Math.abs(b) >= 1e-9) {
+                parts += (b > 0 ? ' + ' : ' - ');
+                if (Math.abs(b) !== 1) parts += Math.abs(b);
+                parts += 'x';
+            }
+            
+            // Format c coefficient
+            if (Math.abs(c) >= 1e-9) {
+                parts += (c > 0 ? ' + ' : ' - ') + Math.abs(c);
+            }
+            
+            return parts;
+        }
+        
+        // Format vertex form for display
+        function formatVertexForm(a, h, k) {
+            if (Math.abs(a) < 1e-9) {
+                return 'N/A (linear)';
+            }
+            
+            function fmtNum(n) {
+                if (Math.abs(n - Math.round(n)) < 1e-9) return String(Math.round(n));
+                return String(n);
+            }
+            
+            let parts = '';
+            
+            // Format a coefficient
+            if (a === 1) parts += '';
+            else if (a === -1) parts += '-';
+            else parts += fmtNum(a);
+            
+            // Format h (x-coordinate of vertex)
+            if (h === 0) {
+                parts += 'x²';
+            } else {
+                parts += '(x ' + (h < 0 ? '+ ' + Math.abs(h) : '- ' + h) + ')²';
+            }
+            
+            // Format k (y-coordinate of vertex)
+            if (k !== 0) {
+                parts += (k > 0 ? ' + ' : ' - ') + Math.abs(k);
+            }
+            
+            return parts;
+        }
+
+        // Main drawing function
+        function drawAll() {
+            // Update canvas dimensions
+            const canvasContainer = canvas.parentElement;
+            width = canvas.width = canvasContainer.clientWidth;
+            height = canvas.height = canvasContainer.clientHeight - 40;
+            
+            // Set initial offset to center the graph
+            offsetX = width / 2;
+            offsetY = height / 2;
+
+            drawGrid();
+            
+            const { a, b, c } = getCoeffs();
+            const info = computeInfo(a, b, c);
+            
+            // Update equation displays
+            equationEl.textContent = formatEquation(a, b, c);
+            
+            // Calculate and display vertex form
+            const { h, k } = standardToVertex(a, b, c);
+            vertexFormEl.textContent = formatVertexForm(a, h, k);
+            
+            // Update properties display
+            if (Math.abs(a) < 1e-9) {
+                // Linear case
+                vertexEl.textContent = 'N/A';
+                axisEl.textContent = 'N/A';
+                discEl.textContent = 'N/A';
+                rootsEl.textContent = info.rootsText;
+                
+                // Draw line
+                ctx.save();
+                ctx.strokeStyle = '#0f62fe';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                const leftX = toWorldX(0);
+                const rightX = toWorldX(width);
+                ctx.moveTo(toCanvasX(leftX), toCanvasY(b * leftX + c));
+                ctx.lineTo(toCanvasX(rightX), toCanvasY(b * rightX + c));
+                ctx.stroke();
+                ctx.restore();
+            } else {
+                // Quadratic case
+                vertexEl.textContent = '(' + info.xv.toFixed(3) + ', ' + info.yv.toFixed(3) + ')';
+                axisEl.textContent = 'x = ' + (-b / (2 * a)).toFixed(3);
+                discEl.textContent = info.disc.toFixed(3);
+                rootsEl.textContent = info.rootsText;
+                
+                plotQuadratic(a, b, c);
+            }
+        }
+
+        // Pan and zoom functionality
+        let isDragging = false;
+        let dragStart = null;
+
+        canvas.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            dragStart = { x: e.clientX, y: e.clientY };
+            canvas.style.cursor = 'grabbing';
+        });
+
+        canvas.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            
+            const dx = e.clientX - dragStart.x;
+            const dy = e.clientY - dragStart.y;
+            
+            offsetX += dx;
+            offsetY += dy;
+            
+            dragStart = { x: e.clientX, y: e.clientY };
+            drawAll();
+        });
+
+        canvas.addEventListener('pointerup', () => {
+            isDragging = false;
+            canvas.style.cursor = 'default';
+        });
+
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            const scaleAmount = Math.exp(-e.deltaY * 0.0015);
+            const mouseX = e.offsetX;
+            const mouseY = e.offsetY;
+            
+            const worldBeforeX = toWorldX(mouseX);
+            const worldBeforeY = toWorldY(mouseY);
+            
+            scale *= scaleAmount;
+            
+            const worldAfterX = toWorldX(mouseX);
+            const worldAfterY = toWorldY(mouseY);
+            
+            offsetX += (worldAfterX - worldBeforeX) * scale;
+            offsetY += (worldAfterY - worldBeforeY) * scale;
+            
+            drawAll();
+        }, { passive: false });
+
+        // Handle window resize
+        window.addEventListener('resize', drawAll);
+
+        // Initialize the graph
+        drawAll();
+    </script>
+</body>
+</html>
